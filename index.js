@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
 //middleware
@@ -27,12 +27,27 @@ async function run() {
     await client.connect();
 
     const petListCollection = client.db('PetAdoptionDB').collection('petList');
+    const donationCampaignCollection = client.db('PetAdoptionDB').collection('donationCampaign');
 
     //pet listing
     app.get('/petList', async(req, res) => {
         const result = await petListCollection.find().toArray();
         res.send(result);
     })
+
+    //pet list details
+    app.get('/petList/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await petListCollection.findOne(query);
+      res.send(result);
+    })
+
+    //donation campaigns
+    app.get('/donationCampaign', async(req, res) => {
+      const result = await donationCampaignCollection.find().toArray();
+      res.send(result);
+  })
 
 
     await client.db("admin").command({ ping: 1 });
