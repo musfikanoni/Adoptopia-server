@@ -28,6 +28,7 @@ async function run() {
 
     const petListCollection = client.db('PetAdoptionDB').collection('petList');
     const donationCampaignCollection = client.db('PetAdoptionDB').collection('donationCampaign');
+    const adoptionReqCollection = client.db('PetAdoptionDB').collection('adoptionRequest');
 
     //pet listing
     app.get('/petList', async(req, res) => {
@@ -54,6 +55,13 @@ async function run() {
     const id = req.params.id;
     const query = {_id: new ObjectId(id)}
     const result = await donationCampaignCollection.findOne(query);
+    res.send(result);
+  })
+
+  //adoption request
+  app.post('/adoptionRequest', async(req, res) => {
+    const adoptionPet = req.body;
+    const result = await adoptionReqCollection.insertOne(adoptionPet);
     res.send(result);
   })
 
