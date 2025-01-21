@@ -59,6 +59,11 @@ async function run() {
   })
 
   //adoption request
+  app.get('/adoptionRequest', async(req, res) => {
+    const result = await adoptionReqCollection.find().toArray();
+    res.send(result);
+  })
+
   app.post('/adoptionRequest', async(req, res) => {
     const adoptionPet = req.body;
     const result = await adoptionReqCollection.insertOne(adoptionPet);
