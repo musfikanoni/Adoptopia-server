@@ -26,9 +26,17 @@ async function run() {
   try {
     await client.connect();
 
+    const userCollection = client.db('PetAdoptionDB').collection('users');
     const petListCollection = client.db('PetAdoptionDB').collection('petList');
     const donationCampaignCollection = client.db('PetAdoptionDB').collection('donationCampaign');
     const adoptionReqCollection = client.db('PetAdoptionDB').collection('adoptionRequest');
+
+    // users
+    app.post('/users', async(req, res) => {
+      const user = req.body;
+      const result = await userCollection.insertOne(user);
+      res.send(result);
+    })
 
     //pet listing
     app.get('/petList', async(req, res) => {
@@ -60,7 +68,9 @@ async function run() {
 
   //adoption request
   app.get('/adoptionRequest', async(req, res) => {
-    const result = await adoptionReqCollection.find().toArray();
+    const email = req.query.email;
+    const query = { email: email }
+    const result = await adoptionReqCollection.find(query).toArray();
     res.send(result);
   })
 
