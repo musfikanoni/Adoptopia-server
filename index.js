@@ -127,6 +127,27 @@ async function run() {
       res.send(result);
     })
 
+    // app.get('/petList/:id', verifyToken, async(req, res) => {
+    //   const id = req.params._id;
+    //   if(id !== req.decoded._id){
+    //     return res.status(403).send({message: 'forbidden access'})
+    //   }
+
+    //   const query = {id: _id};
+    //   const pet = await petListCollectionCollection.findOne(query);
+    //   let adopted = false;
+    //   if(pet){
+    //     adopted = pet?.role === 'adopted';
+    //   }
+    //   res.send({ pet });
+    // })
+
+    app.post('/petList', async(req, res) => {
+      const petList = req.body;
+      const result = await petListCollection.insertOne(petList);
+      res.send(result);
+    })
+
     //donation campaigns
     app.get('/donationCampaign', async(req, res) => {
       const result = await donationCampaignCollection.find().toArray();
