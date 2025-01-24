@@ -115,8 +115,17 @@ async function run() {
 
     //pet listing
     app.get('/petList', async(req, res) => {
-        const result = await petListCollection.find().toArray();
-        res.send(result);
+      const result = await petListCollection.find().toArray();
+      console.log(result)
+      res.send(result);
+    })
+    
+    app.get('/petList', async(req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const result = await petListCollection.find(query).toArray();
+      console.log(result)
+      res.send(result);
     })
 
     //pet list details
