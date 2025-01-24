@@ -114,11 +114,11 @@ async function run() {
     })
 
     //pet listing
-    app.get('/petList', async(req, res) => {
-      const result = await petListCollection.find().toArray();
-      console.log(result)
-      res.send(result);
-    })
+    // app.get('/petList', async(req, res) => {
+    //   const result = await petListCollection.find().toArray();
+    //   console.log(result)
+    //   res.send(result);
+    // })
     
     app.get('/petList', async(req, res) => {
       const email = req.query.email;
@@ -154,6 +154,13 @@ async function run() {
     app.post('/petList', async(req, res) => {
       const petList = req.body;
       const result = await petListCollection.insertOne(petList);
+      res.send(result);
+    })
+
+    app.delete('/petList/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await petListCollection.deleteOne(query);
       res.send(result);
     })
 
