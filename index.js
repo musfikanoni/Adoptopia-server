@@ -75,20 +75,6 @@ async function run() {
       res.send(result);
     })
 
-    app.get('/users/admin/:email', verifyToken, async(req, res) => {
-      const email = req.params.email;
-      if(email !== req.decoded.email){
-        return res.status(403).send({message: 'forbidden access'})
-      }
-
-      const query = {email: email};
-      const user = await userCollection.findOne(query);
-      let admin = false;
-      if(user){
-        admin = user?.role === 'admin';
-      }
-      res.send({ admin });
-    })
 
     app.post('/users', async(req, res) => {
       const user = req.body;
@@ -112,21 +98,23 @@ async function run() {
       const result = await userCollection.updateOne(filter, updatedDoc);
       res.send(result);
     })
-
-    //pet listing
-    // app.get('/petList', async(req, res) => {
-    //   const result = await petListCollection.find().toArray();
-    //   console.log(result)
-    //   res.send(result);
-    // })
     
-    app.get('/petList', async(req, res) => {
+    app.get('/petList', async (req, res) => {
       const email = req.query.email;
-      const query = { email: email };
-      const result = await petListCollection.find(query).toArray();
-      console.log(result)
-      res.send(result);
-    })
+    
+      let query = {};
+      if (email) {
+        query = { email: email };
+      }
+    
+      try {
+        const result = await petListCollection.find(query).toArray();
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: 'Error fetching pet list' });
+      }
+    });
+    
 
     //pet list details
     app.get('/petList/:id', async(req, res) => {
@@ -136,27 +124,42 @@ async function run() {
       res.send(result);
     })
 
-    // app.get('/petList/:id', verifyToken, async(req, res) => {
-    //   const id = req.params._id;
-    //   if(id !== req.decoded._id){
-    //     return res.status(403).send({message: 'forbidden access'})
-    //   }
-
-    //   const query = {id: _id};
-    //   const pet = await petListCollectionCollection.findOne(query);
-    //   let adopted = false;
-    //   if(pet){
-    //     adopted = pet?.role === 'adopted';
-    //   }
-    //   res.send({ pet });
-    // })
 
     app.post('/petList', async(req, res) => {
       const petList = req.body;
       const result = await petListCollection.insertOne(petList);
       res.send(result);
     })
+    
+    //update my added pet
+    app.put('/petList/:id', async (req, res) => {
+      const id = req.params.id;
+      const pet = req.body;
+      const updateDoc = {
+        $set: {
+          ...pet,
+        },
+      };
+      const result = await petListCollection.updateOne(
+        { _id: new ObjectId(id) },
+        updateDoc,
+        { upsert: true }
+      );
+      res.send(result);
+    });
 
+    app.patch('/petList/:id', async (req, res) => {
+      const id = req.params.id;
+      const { adopted } = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = { $set: { adopted } };
+      const result = await petListCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+    
+
+
+    //delete my added pet
     app.delete('/petList/:id', async(req, res) => {
       const id = req.params.id;
       const query = {_id: new ObjectId(id)};
