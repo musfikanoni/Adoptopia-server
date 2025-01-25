@@ -75,6 +75,20 @@ async function run() {
       res.send(result);
     })
 
+    app.get('/users/admin/:email', verifyToken, async(req, res) => {
+      const email = req.params.email;
+      if(email !== req.decoded.email){
+        return res.status(403).send({message: 'forbidden access'})
+      }
+
+      const query = {email: email};
+      const user = await userCollection.findOne(query);
+      let admin = false;
+      if(user){
+        admin = user?.role === 'admin';
+      }
+      res.send({ admin });
+    })
 
     app.post('/users', async(req, res) => {
       const user = req.body;
@@ -124,6 +138,20 @@ async function run() {
       res.send(result);
     })
 
+    // app.get('/petList/:id', verifyToken, async(req, res) => {
+    //   const id = req.params._id;
+    //   if(id !== req.decoded._id){
+    //     return res.status(403).send({message: 'forbidden access'})
+    //   }
+
+    //   const query = {id: _id};
+    //   const pet = await petListCollectionCollection.findOne(query);
+    //   let adopted = false;
+    //   if(pet){
+    //     adopted = pet?.role === 'adopted';
+    //   }
+    //   res.send({ pet });
+    // })
 
     app.post('/petList', async(req, res) => {
       const petList = req.body;
@@ -180,6 +208,13 @@ async function run() {
     const result = await donationCampaignCollection.findOne(query);
     res.send(result);
   })
+
+  app.post('/donationCampaign', async(req, res) => {
+    const petList = req.body;
+    const result = await donationCampaignCollection.insertOne(petList);
+    res.send(result);
+  })
+  
 
   //adoption request
   app.get('/adoptionRequest', async(req, res) => {
