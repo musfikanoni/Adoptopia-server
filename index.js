@@ -202,6 +202,20 @@ async function run() {
     res.send(result);
   })
   
+  //Payment intent
+  app.post('/create-payment-intent', async(req, res) => {
+    const { donation } = req.body;
+    const amount = parseInt(donation * 100);
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount,
+      currency: "usd",
+      payment_method_types: ['card']
+    });
+    res.send({
+      clientSecret: paymentIntent.client_secret
+    })
+  })
 
   //adoption request
   app.get('/adoptionRequest', async(req, res) => {
