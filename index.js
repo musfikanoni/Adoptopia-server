@@ -6,7 +6,7 @@ require('dotenv').config();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 
 //middleware
 app.use(cors());
@@ -27,7 +27,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const userCollection = client.db('PetAdoptionDB').collection('users');
     const petListCollection = client.db('PetAdoptionDB').collection('petList');
@@ -124,14 +124,13 @@ async function run() {
       }
     
       try {
-        const result = await petListCollection.find(query).toArray();
+        const result = await petListCollection.find(query).sort({posted_at: -1}).toArray();
         res.send(result);
       } catch (error) {
         res.status(500).send({ message: 'Error fetching pet list' });
       }
     });
     
-
     //pet list details
     app.get('/petList/:id', async(req, res) => {
       const id = req.params.id;
@@ -162,6 +161,19 @@ async function run() {
       );
       res.send(result);
     });
+
+
+
+
+    // get operation for all pets route
+    app.get("/allPets", verifyToken, verifyAdmin, async (req, res) => {
+    
+        const petList = await petListCollection.find().toArray();
+        const donationCampaigns = await donationCampaignCollection.find().toArray();
+    
+        res.send([ ...petList, ...donationCampaigns ]);
+    });
+    
 
     app.patch('/petList/:id', async (req, res) => {
       const id = req.params.id;
@@ -232,8 +244,8 @@ async function run() {
   })
 
 
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // await client.db("admin").command({ ping: 1 });
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // await client.close();
   }
