@@ -174,6 +174,27 @@ async function run() {
         res.send([ ...petList, ...donationCampaigns ]);
     });
     
+    //delete all pets
+    app.delete('/allPets/:id', verifyToken, verifyAdmin, async (req, res) => {
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id) };
+
+    const petResult = await petListCollection.deleteOne(query);
+    if (petResult.deletedCount > 0) {
+      return res.send(petResult);
+    }
+
+    const donationResult = await donationCampaignCollection.deleteOne(query);
+    if (donationResult.deletedCount > 0) {
+      return res.send(donationResult);
+    }
+
+    res.status(404).send({ message: 'Item not found in either collection' });
+  });
+
+
+
+
 
     app.patch('/petList/:id', async (req, res) => {
       const id = req.params.id;
