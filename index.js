@@ -174,6 +174,27 @@ async function run() {
         res.send([ ...petList, ...donationCampaigns ]);
     });
     
+    // All pets update
+    app.patch('/allPets/:id', async (req, res) => {
+    const id = req.params.id;
+    const { adopted } = req.body;
+
+    const filter = { _id: new ObjectId(id) };
+    const updateDoc = { $set: { adopted } };
+
+    const petResult = await petListCollection.updateOne(filter, updateDoc);
+    if (petResult.matchedCount > 0) {
+      return res.send(petResult);
+    }
+
+    const donationResult = await donationCampaignCollection.updateOne(filter, updateDoc);
+    if (donationResult.matchedCount > 0) {
+      return res.send(donationResult);
+    }
+
+  });
+
+    
     //delete all pets
     app.delete('/allPets/:id', verifyToken, verifyAdmin, async (req, res) => {
     const id = req.params.id;
@@ -196,14 +217,14 @@ async function run() {
 
 
 
-    app.patch('/petList/:id', async (req, res) => {
-      const id = req.params.id;
-      const { adopted } = req.body;
-      const filter = { _id: new ObjectId(id) };
-      const updateDoc = { $set: { adopted } };
-      const result = await petListCollection.updateOne(filter, updateDoc);
-      res.send(result);
-    });
+  app.patch('/petList/:id', async (req, res) => {
+    const id = req.params.id;
+    const { adopted } = req.body;
+    const filter = { _id: new ObjectId(id) };
+    const updateDoc = { $set: { adopted } };
+    const result = await petListCollection.updateOne(filter, updateDoc);
+    res.send(result);
+  });
     
 
 
