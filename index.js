@@ -174,7 +174,7 @@ async function run() {
         res.send([ ...petList, ...donationCampaigns ]);
     });
     
-    // All pets update
+    // All pets adopted status
     app.patch('/allPets/:id', async (req, res) => {
     const id = req.params.id;
     const { adopted } = req.body;
@@ -193,6 +193,28 @@ async function run() {
     }
 
   });
+
+
+  // update my all pets 
+  app.put('/allPets/:id', async (req, res) => {
+    const id = req.params.id;
+    const pet = req.body;
+
+    const filter = { _id: new ObjectId(id) };
+    const updateDoc = { $set: { ...pet } };
+
+    const petResult = await petListCollection.updateOne(filter, updateDoc, { upsert: true });
+    if (petResult.matchedCount > 0) {
+      return res.send(petResult);
+    }
+
+    const donationResult = await donationCampaignCollection.updateOne(filter, updateDoc, { upsert: true });
+    if (donationResult.matchedCount > 0) {
+      return res.send(donationResult);
+    }
+
+  });
+
 
     
     //delete all pets
