@@ -236,9 +236,48 @@ async function run() {
   });
 
 
+  
+
+  app.post('/adoptionRequest/:id', verifyToken, async(req, res) => {
+    const id = req.params.id;
+      const { requestorEmail } = req.body;
+      const requestedPet = req.body;
+
+      // if (requestorEmail !== req.decoded.email) {
+      //   return res.status(403).send({ message: "Unauthorized access" });
+      // }
+
+      const query = {
+        requestorEmail: requestorEmail,
+        pet_id: id,
+      };
+
+      const existingRequest = await adoptionReqCollection.findOne(query);
+
+      if (existingRequest) {
+        return res.send({ message: "ALREADY REQUESTED" });
+      }
+
+      if (!requestedPet) {
+        res.send({ message: "Resource not found" });
+      }
+
+        const finalRequestedPet = {
+        ...requestedPet,
+        isRequested: true,
+        adopted: false,
+        createdAt: new Date(),
+      };
+
+    const result = await adoptionReqCollection.insertOne(finalRequestedPet);
+    res.send(result);
+  })
 
 
 
+
+
+  //my added pet set adopted
   app.patch('/petList/:id', async (req, res) => {
     const id = req.params.id;
     const { adopted } = req.body;
@@ -301,11 +340,7 @@ async function run() {
     res.send(result);
   })
 
-  app.post('/adoptionRequest', async(req, res) => {
-    const adoptionPet = req.body;
-    const result = await adoptionReqCollection.insertOne(adoptionPet);
-    res.send(result);
-  })
+
 
 
     // await client.db("admin").command({ ping: 1 });
